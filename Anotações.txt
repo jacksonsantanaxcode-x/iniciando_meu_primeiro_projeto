@@ -1,0 +1,21 @@
+1- Quero um app pra barbearia
+Agendamentos e cadastro de clientes, calculadora de orçamentos, controle de gastos, catalogo de preços.
+
+2-Quem vai usar:
+Eu mesmo vou usar
+
+3-Funçoes do app:
+*Cadastrar cliente
+*Escolher horario
+*Somar valores automaticamente
+*Relatorios mensal
+*Gerar um pdf pra compartilhar, baixar ou imprimir
+
+4-Logo de uma tesoura Cores laranja e preto
+
+5-sim, quero que os clientes, e os dados dos controles de gastos
+e cadastrados continuem lá depois
+
+Quero tbm um sistema de login 
+Login "teste01"
+Senha "12345678"

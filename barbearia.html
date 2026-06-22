@@ -1,0 +1,1102 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Barbearia — Sistema de Gestão</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    color-scheme: dark;
+    --bg:#121212;
+    --card:#1E1E1E;
+    --card-alt:#262626;
+    --text:#F2F2F0;
+    --text-muted:#A3A3A3;
+    --primary:#FF7A1A;
+    --primary-hover:#E0690D;
+    --success:#22C55E;
+    --success-bg:#163420;
+    --success-text:#6EE7A0;
+    --error:#EF4444;
+    --error-bg:#3A1414;
+    --error-text:#FCA5A5;
+    --border:#2D2D2D;
+    --border-input:#3A3A3A;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-size:15px;line-height:1.5;}
+  h1,h2,h3{margin:0;}
+  .oculto{display:none !important;}
+
+  .faixa-decorativa{
+    height:6px;width:100%;
+    background:repeating-linear-gradient(45deg, var(--primary) 0px, var(--primary) 10px, #000 10px, #000 20px);
+  }
+
+  /* ===== Botões e inputs base ===== */
+  .btn{
+    border:none;border-radius:8px;padding:12px 24px;font-family:'Inter',sans-serif;
+    font-size:15px;font-weight:600;cursor:pointer;transition:.2s ease;
+  }
+  .btn:disabled{opacity:.5;cursor:not-allowed;}
+  .btn-primary{background:var(--primary);color:#1A1A1A;}
+  .btn-primary:hover:not(:disabled){background:var(--primary-hover);}
+  .btn-secundario{background:var(--card-alt);color:var(--text);border:1px solid var(--border-input);}
+  .btn-secundario:hover:not(:disabled){background:#303030;}
+  .btn-sucesso{background:var(--success);color:#0B1F12;}
+  .btn-sucesso:hover:not(:disabled){background:#1CA851;}
+  .btn-erro{background:var(--error);color:#fff;}
+  .btn-erro:hover:not(:disabled){background:#D63A3A;}
+  .btn-erro-texto{background:transparent;color:var(--error);padding:8px 10px;}
+  .btn-erro-texto:hover:not(:disabled){text-decoration:underline;}
+  .btn-texto{background:transparent;color:var(--text-muted);padding:8px 10px;}
+  .btn-texto:hover:not(:disabled){color:var(--text);}
+  .btn-full{width:100%;}
+  .btn-pequeno{padding:8px 14px;font-size:13px;}
+
+  label{display:block;font-size:13px;font-weight:500;color:var(--text-muted);margin-bottom:6px;}
+  input[type=text],input[type=password],input[type=number],input[type=date],input[type=time],input[type=month],select{
+    width:100%;border:1px solid var(--border-input);border-radius:8px;padding:12px 16px;
+    background:#161616;color:var(--text);font-family:'Inter',sans-serif;font-size:15px;transition:.2s ease;
+  }
+  input:focus,select:focus{outline:none;border-color:var(--primary);}
+  .campo{margin-bottom:16px;}
+  .campo-linha{display:flex;gap:16px;}
+  .campo-linha .campo{flex:1;}
+  .campo-com-erro{border-color:var(--error) !important;}
+  .erro{display:block;color:var(--error-text);font-size:13px;margin-top:4px;min-height:0;}
+  .botoes-form{display:flex;gap:12px;align-items:center;flex-wrap:wrap;}
+
+  .sucesso{background:var(--success-bg);color:var(--success-text);border-radius:8px;padding:12px 16px;margin-bottom:16px;font-size:14px;}
+
+  /* ===== Layout geral ===== */
+  .app{max-width:1200px;margin:0 auto;padding:24px 24px 64px;}
+  .topo{display:flex;justify-content:space-between;align-items:center;margin-bottom:32px;gap:16px;flex-wrap:wrap;}
+  .topo-marca{display:flex;align-items:center;gap:14px;}
+  .logo-badge{
+    width:48px;height:48px;border-radius:50%;background:var(--card-alt);border:2px solid var(--primary);
+    display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0;
+  }
+  .logo-badge-sm{width:40px;height:40px;font-size:20px;}
+  .topo-titulo{font-size:24px;font-weight:800;letter-spacing:.3px;}
+  .topo-subtitulo{margin:2px 0 0;font-size:13px;color:var(--text-muted);}
+
+  .abas{display:flex;gap:8px;overflow-x:auto;margin-bottom:32px;padding-bottom:6px;border-bottom:1px solid var(--border);}
+  .aba-btn{
+    flex:0 0 auto;white-space:nowrap;background:transparent;border:none;color:var(--text-muted);
+    font-family:'Inter',sans-serif;font-size:15px;font-weight:600;padding:10px 16px;cursor:pointer;
+    border-bottom:3px solid transparent;transition:.2s ease;
+  }
+  .aba-btn:hover{color:var(--text);}
+  .aba-btn.ativa{color:var(--primary);border-bottom-color:var(--primary);}
+
+  .aba-painel{display:none;}
+  .aba-painel.ativa{display:block;}
+
+  .card{background:var(--card);border-radius:12px;box-shadow:0 1px 3px rgba(0,0,0,.4);padding:24px;}
+  .titulo-card{font-size:18px;font-weight:600;margin-bottom:20px;}
+  .subtitulo-card{font-size:16px;font-weight:600;margin:24px 0 12px;}
+  .texto-muted{color:var(--text-muted);font-size:14px;}
+
+  .grade-2col{display:grid;grid-template-columns:1fr 1fr;gap:24px;align-items:start;margin-bottom:32px;}
+  @media (max-width:768px){
+    .grade-2col{grid-template-columns:1fr;}
+    .campo-linha{flex-direction:column;gap:0;}
+    .app{padding:16px 16px 48px;}
+  }
+
+  .lista-checkbox{display:flex;flex-direction:column;gap:8px;max-height:220px;overflow-y:auto;border:1px solid var(--border);border-radius:8px;padding:8px;}
+  .checkbox-item{display:flex;align-items:center;gap:10px;padding:8px;border-radius:6px;cursor:pointer;transition:.2s ease;}
+  .checkbox-item:hover{background:var(--card-alt);}
+  .checkbox-item input{width:auto;}
+  .checkbox-item span:first-of-type{flex:1;}
+  .checkbox-preco{color:var(--text-muted);font-size:13px;}
+
+  .total-linha{display:flex;justify-content:space-between;align-items:center;background:var(--card-alt);border-radius:8px;padding:14px 16px;margin:16px 0;font-size:16px;}
+  .total-linha strong{color:var(--primary);font-size:18px;}
+
+  .lista-rolavel{max-height:480px;overflow-y:auto;display:flex;flex-direction:column;gap:12px;margin-top:16px;}
+  .item-lista{border:1px solid var(--border);border-radius:8px;padding:14px 16px;}
+  .item-lista-topo{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;gap:8px;}
+  .item-lista-rodape{display:flex;justify-content:space-between;align-items:center;margin-top:10px;gap:8px;flex-wrap:wrap;}
+  .botoes-item{display:flex;gap:8px;}
+
+  .selo-primario,.selo-sucesso{font-size:12px;font-weight:600;padding:4px 10px;border-radius:20px;white-space:nowrap;}
+  .selo-primario{background:rgba(255,122,26,.15);color:var(--primary);}
+  .selo-sucesso{background:var(--success-bg);color:var(--success-text);}
+
+  .tabela-rolavel{overflow-x:auto;margin-top:16px;}
+  table{width:100%;border-collapse:collapse;font-size:14px;}
+  th{background:var(--card-alt);color:var(--text-muted);text-align:left;padding:10px 12px;font-size:13px;font-weight:500;}
+  td{padding:10px 12px;border-bottom:1px solid var(--border);}
+  .celula-acoes{display:flex;gap:6px;white-space:nowrap;}
+
+  .grade-cards-resumo{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin:20px 0;}
+  @media (max-width:768px){.grade-cards-resumo{grid-template-columns:1fr;}}
+  .resumo-card{border-radius:12px;padding:18px;display:flex;flex-direction:column;gap:6px;}
+  .resumo-label{font-size:13px;color:var(--text-muted);}
+  .resumo-valor{font-size:24px;font-weight:800;}
+  .resumo-sucesso{background:var(--success-bg);}
+  .resumo-sucesso .resumo-valor{color:var(--success-text);}
+  .resumo-erro{background:var(--error-bg);}
+  .resumo-erro .resumo-valor{color:var(--error-text);}
+  .resumo-primario{background:rgba(255,122,26,.12);}
+  .resumo-primario .resumo-valor{color:var(--primary);}
+
+  .lista-pagamento{display:flex;flex-direction:column;gap:12px;}
+  .linha-pagamento{display:grid;grid-template-columns:110px 1fr 140px;gap:12px;align-items:center;font-size:14px;}
+  @media (max-width:560px){.linha-pagamento{grid-template-columns:90px 1fr 110px;font-size:13px;}}
+  .barra-fundo{background:var(--card-alt);border-radius:6px;height:10px;overflow:hidden;}
+  .barra-preenchida{background:var(--primary);height:100%;border-radius:6px;transition:.3s ease;}
+
+  /* ===== Login ===== */
+  .login-screen{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;}
+  .login-card{background:var(--card);border-radius:12px;box-shadow:0 1px 3px rgba(0,0,0,.4);padding:32px;max-width:380px;width:100%;text-align:center;}
+  .login-card .logo-badge{width:64px;height:64px;font-size:32px;margin:0 auto 16px;}
+  .login-title{font-size:24px;font-weight:800;}
+  .login-subtitle{color:var(--text-muted);font-size:14px;margin:4px 0 24px;}
+  .login-card form{text-align:left;}
+  .erro-login{color:var(--error-text);font-size:14px;margin-bottom:12px;min-height:0;}
+
+  /* ===== Modal pagamento ===== */
+  .modal-fundo{position:fixed;inset:0;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;padding:16px;z-index:50;}
+  .modal-card{background:var(--card);border-radius:12px;padding:24px;max-width:340px;width:100%;text-align:center;}
+  .modal-card h3{margin-bottom:16px;font-size:18px;}
+  .botoes-pagamento{display:flex;flex-direction:column;gap:10px;margin-bottom:16px;}
+  .btn-pagamento{
+    border:1px solid var(--border-input);background:var(--card-alt);color:var(--text);border-radius:8px;
+    padding:14px;font-family:'Inter',sans-serif;font-size:15px;font-weight:600;cursor:pointer;transition:.2s ease;
+  }
+  .btn-pagamento:hover{border-color:var(--primary);background:rgba(255,122,26,.1);}
+
+  /* ===== Impressão ===== */
+  .print-area{display:none;}
+  .impresso{font-family:Arial,sans-serif;color:#000;}
+  .impresso h1{font-size:20px;margin-bottom:12px;}
+  .impresso-tabela{width:100%;border-collapse:collapse;margin:16px 0;}
+  .impresso-tabela th,.impresso-tabela td{border:1px solid #000;padding:8px;font-size:14px;}
+  .impresso-rodape{margin-top:24px;font-size:13px;color:#333;}
+
+  @media print{
+    body *{visibility:hidden;}
+    .print-area,.print-area *{visibility:visible;}
+    .print-area{display:block;position:absolute;top:0;left:0;width:100%;background:#fff;color:#000;padding:24px;}
+    .faixa-decorativa{display:none;}
+  }
+</style>
+</head>
+<body>
+
+<div class="faixa-decorativa"></div>
+
+<!-- ===== TELA DE LOGIN ===== -->
+<div id="loginScreen" class="login-screen">
+  <div class="login-card">
+    <div class="logo-badge">✂️</div>
+    <h1 class="login-title">Barbearia</h1>
+    <p class="login-subtitle">Sistema de Gestão</p>
+    <form id="formLogin" onsubmit="fazerLogin(event)" novalidate>
+      <div class="campo">
+        <label for="loginUsuario">Usuário</label>
+        <input type="text" id="loginUsuario" autocomplete="username">
+        <span class="erro" id="erroUsuario"></span>
+      </div>
+      <div class="campo">
+        <label for="loginSenha">Senha</label>
+        <input type="password" id="loginSenha" autocomplete="current-password">
+        <span class="erro" id="erroSenha"></span>
+      </div>
+      <div class="erro-login" id="erroLogin"></div>
+      <button type="submit" class="btn btn-primary btn-full">Entrar</button>
+    </form>
+  </div>
+</div>
+
+<!-- ===== APP ===== -->
+<div id="app" class="app oculto">
+  <header class="topo">
+    <div class="topo-marca">
+      <div class="logo-badge logo-badge-sm">✂️</div>
+      <div>
+        <h1 class="topo-titulo">Barbearia</h1>
+        <p class="topo-subtitulo">Sistema de Gestão</p>
+      </div>
+    </div>
+    <button class="btn btn-secundario" onclick="fazerLogout()">Sair</button>
+  </header>
+
+  <nav class="abas">
+    <button class="aba-btn ativa" id="btn-agenda" onclick="mostrarAba('agenda')">📅 Agenda</button>
+    <button class="aba-btn" id="btn-clientes" onclick="mostrarAba('clientes')">👤 Clientes</button>
+    <button class="aba-btn" id="btn-catalogo" onclick="mostrarAba('catalogo')">💈 Catálogo</button>
+    <button class="aba-btn" id="btn-orcamento" onclick="mostrarAba('orcamento')">🧾 Orçamento</button>
+    <button class="aba-btn" id="btn-gastos" onclick="mostrarAba('gastos')">💸 Gastos</button>
+    <button class="aba-btn" id="btn-relatorios" onclick="mostrarAba('relatorios')">📊 Relatórios</button>
+  </nav>
+
+  <!-- AGENDA -->
+  <section id="tab-agenda" class="aba-painel ativa">
+    <div class="grade-2col">
+      <div class="card">
+        <h2 class="titulo-card">Novo Agendamento</h2>
+        <form id="formAgendamento" onsubmit="submitAgendamento(event)" novalidate>
+          <div class="campo">
+            <label for="agendaClienteSelect">Cliente</label>
+            <select id="agendaClienteSelect" onchange="alternarClienteAvulso('agenda')"></select>
+            <span class="erro" id="erroAgendaCliente"></span>
+          </div>
+          <div class="campo oculto" id="campoAgendaAvulso">
+            <label for="agendaNomeAvulso">Nome do cliente</label>
+            <input type="text" id="agendaNomeAvulso" placeholder="Ex: João da esquina">
+          </div>
+          <div class="campo">
+            <label>Serviços</label>
+            <div class="lista-checkbox" id="agendaServicos"></div>
+            <span class="erro" id="erroAgendaServicos"></span>
+          </div>
+          <div class="campo-linha">
+            <div class="campo">
+              <label for="agendaData">Data</label>
+              <input type="date" id="agendaData">
+              <span class="erro" id="erroAgendaData"></span>
+            </div>
+            <div class="campo">
+              <label for="agendaHora">Horário</label>
+              <input type="time" id="agendaHora">
+              <span class="erro" id="erroAgendaHora"></span>
+            </div>
+          </div>
+          <div class="total-linha"><span>Total</span><strong id="agendaTotalValor">R$ 0,00</strong></div>
+          <div id="sucessoAgendamento" class="sucesso oculto"></div>
+          <button type="submit" class="btn btn-primary btn-full">Agendar</button>
+        </form>
+      </div>
+
+      <div class="card">
+        <h2 class="titulo-card">Próximos Atendimentos</h2>
+        <div class="campo">
+          <label for="filtroAgendaData">Filtrar por data</label>
+          <input type="date" id="filtroAgendaData" onchange="renderAgendamentos()">
+        </div>
+        <button type="button" class="btn btn-texto" onclick="limparFiltroAgenda()" style="margin-bottom:8px;">Ver todos os dias</button>
+        <div class="lista-rolavel" id="listaAgendamentos"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CLIENTES -->
+  <section id="tab-clientes" class="aba-painel">
+    <div class="grade-2col">
+      <div class="card">
+        <h2 class="titulo-card" id="tituloFormCliente">Novo Cliente</h2>
+        <form id="formCliente" onsubmit="submitCliente(event)" novalidate>
+          <input type="hidden" id="clienteEditId">
+          <div class="campo">
+            <label for="clienteNome">Nome</label>
+            <input type="text" id="clienteNome" placeholder="Ex: Carlos Souza">
+            <span class="erro" id="erroClienteNome"></span>
+          </div>
+          <div class="campo">
+            <label for="clienteTelefone">Telefone</label>
+            <input type="text" id="clienteTelefone" placeholder="Ex: (21) 99999-9999">
+          </div>
+          <div class="campo">
+            <label for="clienteObs">Observação</label>
+            <input type="text" id="clienteObs" placeholder="Ex: gosta de degradê baixo">
+          </div>
+          <div id="sucessoCliente" class="sucesso oculto"></div>
+          <div class="botoes-form">
+            <button type="submit" class="btn btn-primary">Salvar Cliente</button>
+            <button type="button" class="btn btn-texto oculto" id="btnCancelarEdicaoCliente" onclick="cancelarEdicaoCliente()">Cancelar edição</button>
+          </div>
+        </form>
+      </div>
+
+      <div class="card">
+        <h2 class="titulo-card">Clientes Cadastrados</h2>
+        <input type="text" id="buscaCliente" placeholder="Buscar por nome..." oninput="renderClientes()">
+        <div class="tabela-rolavel">
+          <table>
+            <thead><tr><th>Nome</th><th>Telefone</th><th>Observação</th><th>Ações</th></tr></thead>
+            <tbody id="corpoTabelaClientes"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CATÁLOGO -->
+  <section id="tab-catalogo" class="aba-painel">
+    <div class="grade-2col">
+      <div class="card">
+        <h2 class="titulo-card" id="tituloFormServico">Novo Serviço</h2>
+        <form id="formServico" onsubmit="submitServico(event)" novalidate>
+          <input type="hidden" id="servicoEditId">
+          <div class="campo">
+            <label for="servicoNome">Nome do serviço</label>
+            <input type="text" id="servicoNome" placeholder="Ex: Corte degradê">
+            <span class="erro" id="erroServicoNome"></span>
+          </div>
+          <div class="campo">
+            <label for="servicoPreco">Preço (R$)</label>
+            <input type="number" id="servicoPreco" min="0" step="0.01" placeholder="Ex: 35.00">
+            <span class="erro" id="erroServicoPreco"></span>
+          </div>
+          <div id="sucessoServico" class="sucesso oculto"></div>
+          <div class="botoes-form">
+            <button type="submit" class="btn btn-primary">Salvar Serviço</button>
+            <button type="button" class="btn btn-texto oculto" id="btnCancelarEdicaoServico" onclick="cancelarEdicaoServico()">Cancelar edição</button>
+          </div>
+        </form>
+      </div>
+
+      <div class="card">
+        <h2 class="titulo-card">Tabela de Preços</h2>
+        <div class="tabela-rolavel">
+          <table>
+            <thead><tr><th>Serviço</th><th>Preço</th><th>Ações</th></tr></thead>
+            <tbody id="corpoTabelaServicos"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ORÇAMENTO -->
+  <section id="tab-orcamento" class="aba-painel">
+    <div class="card" style="max-width:560px;">
+      <h2 class="titulo-card">Calculadora de Orçamento</h2>
+      <div class="campo">
+        <label for="orcamentoClienteSelect">Cliente</label>
+        <select id="orcamentoClienteSelect" onchange="alternarClienteAvulso('orcamento')"></select>
+      </div>
+      <div class="campo oculto" id="campoOrcamentoAvulso">
+        <label for="orcamentoNomeAvulso">Nome do cliente</label>
+        <input type="text" id="orcamentoNomeAvulso" placeholder="Ex: cliente avulso">
+      </div>
+      <div class="campo">
+        <label>Serviços</label>
+        <div class="lista-checkbox" id="orcamentoServicos"></div>
+      </div>
+      <div class="total-linha"><span>Total</span><strong id="orcamentoTotalValor">R$ 0,00</strong></div>
+      <button type="button" class="btn btn-primary btn-full" onclick="gerarPDFOrcamento()">🧾 Gerar PDF / Imprimir</button>
+    </div>
+  </section>
+
+  <!-- GASTOS -->
+  <section id="tab-gastos" class="aba-painel">
+    <div class="grade-2col">
+      <div class="card">
+        <h2 class="titulo-card" id="tituloFormGasto">Novo Gasto</h2>
+        <form id="formGasto" onsubmit="submitGasto(event)" novalidate>
+          <input type="hidden" id="gastoEditId">
+          <div class="campo">
+            <label for="gastoDescricao">Descrição</label>
+            <input type="text" id="gastoDescricao" placeholder="Ex: Compra de pomadas">
+            <span class="erro" id="erroGastoDescricao"></span>
+          </div>
+          <div class="campo">
+            <label for="gastoCategoria">Categoria</label>
+            <select id="gastoCategoria">
+              <option>Produtos</option>
+              <option>Aluguel</option>
+              <option>Contas (água/luz)</option>
+              <option>Manutenção</option>
+              <option>Outros</option>
+            </select>
+          </div>
+          <div class="campo">
+            <label for="gastoValor">Valor (R$)</label>
+            <input type="number" id="gastoValor" min="0" step="0.01" placeholder="Ex: 80.00">
+            <span class="erro" id="erroGastoValor"></span>
+          </div>
+          <div class="campo">
+            <label for="gastoData">Data</label>
+            <input type="date" id="gastoData">
+            <span class="erro" id="erroGastoData"></span>
+          </div>
+          <div id="sucessoGasto" class="sucesso oculto"></div>
+          <div class="botoes-form">
+            <button type="submit" class="btn btn-primary">Salvar Gasto</button>
+            <button type="button" class="btn btn-texto oculto" id="btnCancelarEdicaoGasto" onclick="cancelarEdicaoGasto()">Cancelar edição</button>
+          </div>
+        </form>
+      </div>
+
+      <div class="card">
+        <h2 class="titulo-card">Gastos Lançados</h2>
+        <div class="campo">
+          <label for="filtroGastoMes">Filtrar por mês</label>
+          <input type="month" id="filtroGastoMes" onchange="renderGastos()">
+        </div>
+        <button type="button" class="btn btn-texto" onclick="limparFiltroGasto()" style="margin-bottom:8px;">Ver todos os meses</button>
+        <div class="tabela-rolavel">
+          <table>
+            <thead><tr><th>Data</th><th>Descrição</th><th>Categoria</th><th>Valor</th><th>Ações</th></tr></thead>
+            <tbody id="corpoTabelaGastos"></tbody>
+          </table>
+        </div>
+        <div class="total-linha"><span>Total do filtro</span><strong id="totalGastosFiltro">R$ 0,00</strong></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- RELATÓRIOS -->
+  <section id="tab-relatorios" class="aba-painel">
+    <div class="card" style="max-width:680px;">
+      <h2 class="titulo-card">Relatório Mensal</h2>
+      <div class="campo" style="max-width:220px;">
+        <label for="relatorioMes">Mês</label>
+        <input type="month" id="relatorioMes" onchange="renderRelatorio()">
+      </div>
+      <div class="grade-cards-resumo">
+        <div class="resumo-card resumo-sucesso">
+          <span class="resumo-label">Faturamento</span>
+          <span class="resumo-valor" id="relFaturamento">R$ 0,00</span>
+        </div>
+        <div class="resumo-card resumo-erro">
+          <span class="resumo-label">Gastos</span>
+          <span class="resumo-valor" id="relGastos">R$ 0,00</span>
+        </div>
+        <div class="resumo-card resumo-primario">
+          <span class="resumo-label">Lucro</span>
+          <span class="resumo-valor" id="relLucro">R$ 0,00</span>
+        </div>
+      </div>
+      <h3 class="subtitulo-card">Recebimentos por forma de pagamento</h3>
+      <div class="lista-pagamento" id="relFormasPagamento"></div>
+      <p class="texto-muted" id="relExtras" style="margin-top:16px;"></p>
+      <button type="button" class="btn btn-primary" style="margin-top:8px;" onclick="gerarPDFRelatorio()">📊 Gerar PDF do Relatório</button>
+    </div>
+  </section>
+</div>
+
+<!-- MODAL PAGAMENTO -->
+<div id="modalPagamento" class="modal-fundo oculto">
+  <div class="modal-card">
+    <h3>Como o cliente pagou?</h3>
+    <div class="botoes-pagamento">
+      <button class="btn-pagamento" onclick="confirmarPagamento('dinheiro')">💵 Dinheiro</button>
+      <button class="btn-pagamento" onclick="confirmarPagamento('cartao')">💳 Cartão</button>
+      <button class="btn-pagamento" onclick="confirmarPagamento('pix')">📱 Pix</button>
+    </div>
+    <button type="button" class="btn btn-texto" onclick="fecharModalPagamento()">Cancelar</button>
+  </div>
+</div>
+
+<div id="printArea" class="print-area"></div>
+
+<script>
+/* ===================== ESTADO ===================== */
+let clientes = [];
+let servicos = [];
+let agendamentos = [];
+let gastos = [];
+let pendingConcluirId = null;
+
+const LOGIN_USUARIO = 'teste01';
+const LOGIN_SENHA = '12345678';
+
+/* ===================== ARMAZENAMENTO ===================== */
+function carregar(chave, padrao){
+  try{
+    const raw = localStorage.getItem(chave);
+    if(!raw) return padrao;
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed : padrao;
+  }catch(e){
+    console.error('Erro ao carregar', chave, e);
+    return padrao;
+  }
+}
+function salvar(chave, valor){
+  try{
+    localStorage.setItem(chave, JSON.stringify(valor));
+    return true;
+  }catch(e){
+    console.error('Erro ao salvar', chave, e);
+    return false;
+  }
+}
+
+/* ===================== UTILITÁRIOS ===================== */
+function gerarId(){ return Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
+function formatarMoeda(v){ return 'R$ ' + Number(v||0).toFixed(2).replace('.', ','); }
+function formatarDataBR(iso){ if(!iso) return ''; const [a,m,d]=iso.split('-'); return `${d}/${m}/${a}`; }
+function hojeISO(){ const d=new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; }
+function mesAtual(){ const d=new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`; }
+function escapeHtml(t){ const div=document.createElement('div'); div.textContent = t==null ? '' : String(t); return div.innerHTML; }
+function formatarFormaPagamento(f){ return {dinheiro:'Dinheiro',cartao:'Cartão',pix:'Pix'}[f] || ''; }
+
+function setErro(id, msg){
+  const el = document.getElementById(id);
+  if(!el) return;
+  el.textContent = msg;
+  const input = el.previousElementSibling;
+  if(input && (input.tagName==='INPUT'||input.tagName==='SELECT')) input.classList.add('campo-com-erro');
+}
+function limparErros(ids){
+  ids.forEach(id=>{
+    const el = document.getElementById(id);
+    if(!el) return;
+    el.textContent = '';
+    const input = el.previousElementSibling;
+    if(input) input.classList.remove('campo-com-erro');
+  });
+}
+function mostrarSucesso(id, msg){
+  const el = document.getElementById(id);
+  if(!el) return;
+  el.textContent = msg;
+  el.classList.remove('oculto');
+  setTimeout(()=>el.classList.add('oculto'), 3000);
+}
+
+/* ===================== LOGIN ===================== */
+function fazerLogin(e){
+  e.preventDefault();
+  limparErros(['erroUsuario','erroSenha']);
+  document.getElementById('erroLogin').textContent = '';
+  const usuario = document.getElementById('loginUsuario').value.trim();
+  const senha = document.getElementById('loginSenha').value;
+  let valido = true;
+  if(!usuario){ setErro('erroUsuario','Digite o usuário'); valido=false; }
+  if(!senha){ setErro('erroSenha','Digite a senha'); valido=false; }
+  if(!valido) return;
+
+  if(usuario===LOGIN_USUARIO && senha===LOGIN_SENHA){
+    document.getElementById('loginScreen').classList.add('oculto');
+    document.getElementById('app').classList.remove('oculto');
+    document.getElementById('formLogin').reset();
+    initApp();
+  }else{
+    document.getElementById('erroLogin').textContent = 'Usuário ou senha incorretos.';
+  }
+}
+function fazerLogout(){
+  document.getElementById('app').classList.add('oculto');
+  document.getElementById('loginScreen').classList.remove('oculto');
+}
+
+/* ===================== INICIALIZAÇÃO ===================== */
+function initApp(){
+  clientes = carregar('barbearia_clientes', []);
+  servicos = carregar('barbearia_servicos', []);
+  agendamentos = carregar('barbearia_agendamentos', []);
+  gastos = carregar('barbearia_gastos', []);
+
+  document.getElementById('agendaData').value = hojeISO();
+  document.getElementById('gastoData').value = hojeISO();
+  document.getElementById('relatorioMes').value = mesAtual();
+
+  popularSelectClientes('agendaClienteSelect');
+  popularSelectClientes('orcamentoClienteSelect');
+  popularCheckboxServicos('agendaServicos','atualizarTotalAgenda');
+  popularCheckboxServicos('orcamentoServicos','atualizarTotalOrcamento');
+
+  renderClientes();
+  renderServicos();
+  renderAgendamentos();
+  renderGastos();
+  renderRelatorio();
+  atualizarTotalAgenda();
+  atualizarTotalOrcamento();
+}
+
+function mostrarAba(nome){
+  document.querySelectorAll('.aba-painel').forEach(p=>p.classList.remove('ativa'));
+  document.querySelectorAll('.aba-btn').forEach(b=>b.classList.remove('ativa'));
+  document.getElementById('tab-'+nome).classList.add('ativa');
+  document.getElementById('btn-'+nome).classList.add('ativa');
+}
+
+function alternarClienteAvulso(prefixo){
+  const select = document.getElementById(prefixo+'ClienteSelect');
+  const campoId = 'campo'+prefixo.charAt(0).toUpperCase()+prefixo.slice(1)+'Avulso';
+  const campo = document.getElementById(campoId);
+  if(select.value === '__avulso__') campo.classList.remove('oculto');
+  else campo.classList.add('oculto');
+}
+
+function popularSelectClientes(selectId){
+  const select = document.getElementById(selectId);
+  const valorAtual = select.value;
+  select.innerHTML = '<option value="">Cliente avulso / não informado</option><option value="__avulso__">Outro (digitar nome)</option>';
+  clientes.slice().sort((a,b)=>a.nome.localeCompare(b.nome)).forEach(c=>{
+    const opt = document.createElement('option');
+    opt.value = c.id;
+    opt.textContent = c.nome;
+    select.appendChild(opt);
+  });
+  if([...select.options].some(o=>o.value===valorAtual)) select.value = valorAtual;
+}
+
+function popularCheckboxServicos(containerId, onChangeFnName){
+  const container = document.getElementById(containerId);
+  if(servicos.length===0){
+    container.innerHTML = '<p class="texto-muted" style="margin:4px;">Nenhum serviço cadastrado ainda. Adicione no Catálogo primeiro.</p>';
+    return;
+  }
+  container.innerHTML = servicos.map(s=>`
+    <label class="checkbox-item">
+      <input type="checkbox" value="${s.id}" data-preco="${s.preco}" onchange="${onChangeFnName}()">
+      <span>${escapeHtml(s.nome)}</span>
+      <span class="checkbox-preco">${formatarMoeda(s.preco)}</span>
+    </label>
+  `).join('');
+}
+
+/* ===================== AGENDA ===================== */
+function atualizarTotalAgenda(){
+  const marcados = [...document.querySelectorAll('#agendaServicos input[type=checkbox]:checked')];
+  const total = marcados.reduce((s,c)=>s+Number(c.dataset.preco||0),0);
+  document.getElementById('agendaTotalValor').textContent = formatarMoeda(total);
+}
+
+function submitAgendamento(e){
+  e.preventDefault();
+  limparErros(['erroAgendaCliente','erroAgendaServicos','erroAgendaData','erroAgendaHora']);
+  let valido = true;
+
+  const selectCliente = document.getElementById('agendaClienteSelect');
+  const nomeAvulso = document.getElementById('agendaNomeAvulso');
+  let clienteId = null, clienteNome = '';
+
+  if(selectCliente.value === '__avulso__'){
+    if(!nomeAvulso.value.trim()){ setErro('erroAgendaCliente','Digite o nome do cliente'); valido=false; }
+    else clienteNome = nomeAvulso.value.trim();
+  }else if(selectCliente.value){
+    clienteId = selectCliente.value;
+    const c = clientes.find(c=>c.id===clienteId);
+    clienteNome = c ? c.nome : '';
+  }else{
+    clienteNome = 'Cliente avulso';
+  }
+
+  const marcados = [...document.querySelectorAll('#agendaServicos input[type=checkbox]:checked')].map(i=>i.value);
+  if(marcados.length===0){ setErro('erroAgendaServicos','Escolha pelo menos um serviço'); valido=false; }
+
+  const data = document.getElementById('agendaData').value;
+  if(!data){ setErro('erroAgendaData','Escolha a data'); valido=false; }
+
+  const hora = document.getElementById('agendaHora').value;
+  if(!hora){ setErro('erroAgendaHora','Escolha o horário'); valido=false; }
+
+  if(!valido) return;
+
+  const total = marcados.reduce((soma,id)=>{ const s=servicos.find(s=>s.id===id); return soma+(s?s.preco:0); },0);
+
+  agendamentos.push({
+    id: gerarId(), clienteId, clienteNome, servicoIds: marcados,
+    data, hora, status:'agendado', formaPagamento:null, valorTotal: total
+  });
+  salvar('barbearia_agendamentos', agendamentos);
+
+  document.getElementById('formAgendamento').reset();
+  document.getElementById('agendaData').value = hojeISO();
+  document.getElementById('campoAgendaAvulso').classList.add('oculto');
+  atualizarTotalAgenda();
+  renderAgendamentos();
+  mostrarSucesso('sucessoAgendamento','Agendamento criado com sucesso!');
+}
+
+function renderAgendamentos(){
+  const filtro = document.getElementById('filtroAgendaData').value;
+  let lista = agendamentos.slice();
+  if(filtro) lista = lista.filter(a=>a.data===filtro);
+  lista.sort((a,b)=>(a.data+a.hora).localeCompare(b.data+b.hora));
+
+  const container = document.getElementById('listaAgendamentos');
+  if(lista.length===0){ container.innerHTML = '<p class="texto-muted">Nenhum agendamento encontrado.</p>'; return; }
+
+  container.innerHTML = lista.map(a=>{
+    const nomesServicos = a.servicoIds.map(id=>{ const s=servicos.find(s=>s.id===id); return s?s.nome:'(serviço removido)'; }).join(', ');
+    const selo = a.status==='concluido' ? 'selo-sucesso' : 'selo-primario';
+    const textoSelo = a.status==='concluido' ? ('Concluído • '+formatarFormaPagamento(a.formaPagamento)) : 'Agendado';
+    return `
+      <div class="item-lista">
+        <div class="item-lista-topo">
+          <strong>${escapeHtml(a.clienteNome||'Sem nome')}</strong>
+          <span class="${selo}">${textoSelo}</span>
+        </div>
+        <div class="texto-muted">${formatarDataBR(a.data)} às ${a.hora}</div>
+        <div class="texto-muted">${escapeHtml(nomesServicos)}</div>
+        <div class="item-lista-rodape">
+          <strong>${formatarMoeda(a.valorTotal)}</strong>
+          <div class="botoes-item">
+            ${a.status==='agendado' ? `<button class="btn btn-sucesso btn-pequeno" onclick="abrirModalPagamento('${a.id}')">Concluir</button>` : ''}
+            <button class="btn btn-erro btn-pequeno" onclick="excluirAgendamento('${a.id}')">Excluir</button>
+          </div>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function limparFiltroAgenda(){ document.getElementById('filtroAgendaData').value=''; renderAgendamentos(); }
+
+function abrirModalPagamento(id){ pendingConcluirId = id; document.getElementById('modalPagamento').classList.remove('oculto'); }
+function fecharModalPagamento(){ pendingConcluirId = null; document.getElementById('modalPagamento').classList.add('oculto'); }
+function confirmarPagamento(forma){
+  const ag = agendamentos.find(a=>a.id===pendingConcluirId);
+  if(ag){ ag.status='concluido'; ag.formaPagamento=forma; salvar('barbearia_agendamentos', agendamentos); }
+  fecharModalPagamento();
+  renderAgendamentos();
+  renderRelatorio();
+}
+function excluirAgendamento(id){
+  if(!confirm('Excluir este agendamento?')) return;
+  agendamentos = agendamentos.filter(a=>a.id!==id);
+  salvar('barbearia_agendamentos', agendamentos);
+  renderAgendamentos();
+  renderRelatorio();
+}
+
+/* ===================== CLIENTES ===================== */
+function renderClientes(){
+  const busca = (document.getElementById('buscaCliente').value||'').toLowerCase();
+  const lista = clientes.filter(c=>c.nome.toLowerCase().includes(busca)).slice().sort((a,b)=>a.nome.localeCompare(b.nome));
+  const corpo = document.getElementById('corpoTabelaClientes');
+  if(lista.length===0){ corpo.innerHTML = '<tr><td colspan="4" class="texto-muted">Nenhum cliente encontrado.</td></tr>'; return; }
+  corpo.innerHTML = lista.map(c=>`
+    <tr>
+      <td>${escapeHtml(c.nome)}</td>
+      <td>${escapeHtml(c.telefone||'-')}</td>
+      <td>${escapeHtml(c.observacao||'-')}</td>
+      <td class="celula-acoes">
+        <button class="btn btn-texto btn-pequeno" onclick="editarCliente('${c.id}')">Editar</button>
+        <button class="btn btn-erro-texto btn-pequeno" onclick="excluirCliente('${c.id}')">Excluir</button>
+      </td>
+    </tr>
+  `).join('');
+}
+
+function submitCliente(e){
+  e.preventDefault();
+  limparErros(['erroClienteNome']);
+  const nome = document.getElementById('clienteNome').value.trim();
+  if(!nome){ setErro('erroClienteNome','Digite o nome do cliente'); return; }
+  const telefone = document.getElementById('clienteTelefone').value.trim();
+  const obs = document.getElementById('clienteObs').value.trim();
+  const editId = document.getElementById('clienteEditId').value;
+
+  if(editId){
+    const c = clientes.find(c=>c.id===editId);
+    if(c){ c.nome=nome; c.telefone=telefone; c.observacao=obs; }
+  }else{
+    clientes.push({id:gerarId(), nome, telefone, observacao:obs});
+  }
+  salvar('barbearia_clientes', clientes);
+  cancelarEdicaoCliente();
+  renderClientes();
+  popularSelectClientes('agendaClienteSelect');
+  popularSelectClientes('orcamentoClienteSelect');
+  mostrarSucesso('sucessoCliente', editId ? 'Cliente atualizado!' : 'Cliente salvo com sucesso!');
+}
+
+function editarCliente(id){
+  const c = clientes.find(c=>c.id===id);
+  if(!c) return;
+  document.getElementById('clienteEditId').value = c.id;
+  document.getElementById('clienteNome').value = c.nome;
+  document.getElementById('clienteTelefone').value = c.telefone||'';
+  document.getElementById('clienteObs').value = c.observacao||'';
+  document.getElementById('tituloFormCliente').textContent = 'Editar Cliente';
+  document.getElementById('btnCancelarEdicaoCliente').classList.remove('oculto');
+  mostrarAba('clientes');
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+function cancelarEdicaoCliente(){
+  document.getElementById('formCliente').reset();
+  document.getElementById('clienteEditId').value = '';
+  document.getElementById('tituloFormCliente').textContent = 'Novo Cliente';
+  document.getElementById('btnCancelarEdicaoCliente').classList.add('oculto');
+  limparErros(['erroClienteNome']);
+}
+
+function excluirCliente(id){
+  if(!confirm('Excluir este cliente? Os agendamentos antigos dele serão mantidos no histórico.')) return;
+  clientes = clientes.filter(c=>c.id!==id);
+  salvar('barbearia_clientes', clientes);
+  renderClientes();
+  popularSelectClientes('agendaClienteSelect');
+  popularSelectClientes('orcamentoClienteSelect');
+}
+
+/* ===================== CATÁLOGO (SERVIÇOS) ===================== */
+function renderServicos(){
+  const lista = servicos.slice().sort((a,b)=>a.nome.localeCompare(b.nome));
+  const corpo = document.getElementById('corpoTabelaServicos');
+  if(lista.length===0){ corpo.innerHTML = '<tr><td colspan="3" class="texto-muted">Nenhum serviço cadastrado.</td></tr>'; return; }
+  corpo.innerHTML = lista.map(s=>`
+    <tr>
+      <td>${escapeHtml(s.nome)}</td>
+      <td>${formatarMoeda(s.preco)}</td>
+      <td class="celula-acoes">
+        <button class="btn btn-texto btn-pequeno" onclick="editarServico('${s.id}')">Editar</button>
+        <button class="btn btn-erro-texto btn-pequeno" onclick="excluirServico('${s.id}')">Excluir</button>
+      </td>
+    </tr>
+  `).join('');
+}
+
+function atualizarListasServicos(){
+  popularCheckboxServicos('agendaServicos','atualizarTotalAgenda');
+  popularCheckboxServicos('orcamentoServicos','atualizarTotalOrcamento');
+  atualizarTotalAgenda();
+  atualizarTotalOrcamento();
+}
+
+function submitServico(e){
+  e.preventDefault();
+  limparErros(['erroServicoNome','erroServicoPreco']);
+  let valido = true;
+  const nome = document.getElementById('servicoNome').value.trim();
+  if(!nome){ setErro('erroServicoNome','Digite o nome do serviço'); valido=false; }
+  const preco = parseFloat(document.getElementById('servicoPreco').value);
+  if(isNaN(preco) || preco<=0){ setErro('erroServicoPreco','Digite um preço válido'); valido=false; }
+  if(!valido) return;
+
+  const editId = document.getElementById('servicoEditId').value;
+  if(editId){
+    const s = servicos.find(s=>s.id===editId);
+    if(s){ s.nome=nome; s.preco=preco; }
+  }else{
+    servicos.push({id:gerarId(), nome, preco});
+  }
+  salvar('barbearia_servicos', servicos);
+  cancelarEdicaoServico();
+  renderServicos();
+  atualizarListasServicos();
+  mostrarSucesso('sucessoServico', editId ? 'Serviço atualizado!' : 'Serviço salvo com sucesso!');
+}
+
+function editarServico(id){
+  const s = servicos.find(s=>s.id===id);
+  if(!s) return;
+  document.getElementById('servicoEditId').value = s.id;
+  document.getElementById('servicoNome').value = s.nome;
+  document.getElementById('servicoPreco').value = s.preco;
+  document.getElementById('tituloFormServico').textContent = 'Editar Serviço';
+  document.getElementById('btnCancelarEdicaoServico').classList.remove('oculto');
+  mostrarAba('catalogo');
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+function cancelarEdicaoServico(){
+  document.getElementById('formServico').reset();
+  document.getElementById('servicoEditId').value = '';
+  document.getElementById('tituloFormServico').textContent = 'Novo Serviço';
+  document.getElementById('btnCancelarEdicaoServico').classList.add('oculto');
+  limparErros(['erroServicoNome','erroServicoPreco']);
+}
+
+function excluirServico(id){
+  if(!confirm('Excluir este serviço do catálogo?')) return;
+  servicos = servicos.filter(s=>s.id!==id);
+  salvar('barbearia_servicos', servicos);
+  renderServicos();
+  atualizarListasServicos();
+}
+
+/* ===================== ORÇAMENTO ===================== */
+function atualizarTotalOrcamento(){
+  const marcados = [...document.querySelectorAll('#orcamentoServicos input[type=checkbox]:checked')];
+  const total = marcados.reduce((s,c)=>s+Number(c.dataset.preco||0),0);
+  document.getElementById('orcamentoTotalValor').textContent = formatarMoeda(total);
+}
+
+function gerarPDFOrcamento(){
+  const selectCliente = document.getElementById('orcamentoClienteSelect');
+  const nomeAvulso = document.getElementById('orcamentoNomeAvulso');
+  let nomeCliente = '';
+  if(selectCliente.value === '__avulso__') nomeCliente = nomeAvulso.value.trim();
+  else if(selectCliente.value){ const c = clientes.find(c=>c.id===selectCliente.value); nomeCliente = c?c.nome:''; }
+
+  const marcados = [...document.querySelectorAll('#orcamentoServicos input[type=checkbox]:checked')];
+  if(marcados.length===0){ alert('Selecione pelo menos um serviço para gerar o orçamento.'); return; }
+
+  const linhas = marcados.map(chk=>{
+    const s = servicos.find(s=>s.id===chk.value);
+    return `<tr><td>${escapeHtml(s?s.nome:'')}</td><td style="text-align:right">${formatarMoeda(s?s.preco:0)}</td></tr>`;
+  }).join('');
+  const total = marcados.reduce((s,chk)=>s+Number(chk.dataset.preco||0),0);
+
+  document.getElementById('printArea').innerHTML = `
+    <div class="impresso">
+      <h1>✂️ Barbearia — Orçamento</h1>
+      <p>Data: ${formatarDataBR(hojeISO())}</p>
+      ${nomeCliente ? `<p>Cliente: ${escapeHtml(nomeCliente)}</p>` : ''}
+      <table class="impresso-tabela">
+        <thead><tr><th>Serviço</th><th style="text-align:right">Valor</th></tr></thead>
+        <tbody>${linhas}</tbody>
+        <tfoot><tr><td><strong>Total</strong></td><td style="text-align:right"><strong>${formatarMoeda(total)}</strong></td></tr></tfoot>
+      </table>
+      <p class="impresso-rodape">Orçamento válido conforme combinado. Obrigado pela confiança!</p>
+    </div>
+  `;
+  window.print();
+}
+
+/* ===================== GASTOS ===================== */
+function renderGastos(){
+  const mesFiltro = document.getElementById('filtroGastoMes').value;
+  let lista = gastos.slice();
+  if(mesFiltro) lista = lista.filter(g=>g.data && g.data.slice(0,7)===mesFiltro);
+  lista.sort((a,b)=>b.data.localeCompare(a.data));
+
+  const corpo = document.getElementById('corpoTabelaGastos');
+  if(lista.length===0){
+    corpo.innerHTML = '<tr><td colspan="5" class="texto-muted">Nenhum gasto encontrado.</td></tr>';
+    document.getElementById('totalGastosFiltro').textContent = formatarMoeda(0);
+    return;
+  }
+  corpo.innerHTML = lista.map(g=>`
+    <tr>
+      <td>${formatarDataBR(g.data)}</td>
+      <td>${escapeHtml(g.descricao)}</td>
+      <td>${escapeHtml(g.categoria)}</td>
+      <td>${formatarMoeda(g.valor)}</td>
+      <td class="celula-acoes">
+        <button class="btn btn-texto btn-pequeno" onclick="editarGasto('${g.id}')">Editar</button>
+        <button class="btn btn-erro-texto btn-pequeno" onclick="excluirGasto('${g.id}')">Excluir</button>
+      </td>
+    </tr>
+  `).join('');
+  const total = lista.reduce((s,g)=>s+Number(g.valor||0),0);
+  document.getElementById('totalGastosFiltro').textContent = formatarMoeda(total);
+}
+
+function limparFiltroGasto(){ document.getElementById('filtroGastoMes').value=''; renderGastos(); }
+
+function submitGasto(e){
+  e.preventDefault();
+  limparErros(['erroGastoDescricao','erroGastoValor','erroGastoData']);
+  let valido = true;
+  const descricao = document.getElementById('gastoDescricao').value.trim();
+  if(!descricao){ setErro('erroGastoDescricao','Digite a descrição'); valido=false; }
+  const categoria = document.getElementById('gastoCategoria').value;
+  const valor = parseFloat(document.getElementById('gastoValor').value);
+  if(isNaN(valor) || valor<=0){ setErro('erroGastoValor','Digite um valor válido'); valido=false; }
+  const data = document.getElementById('gastoData').value;
+  if(!data){ setErro('erroGastoData','Escolha a data'); valido=false; }
+  if(!valido) return;
+
+  const editId = document.getElementById('gastoEditId').value;
+  if(editId){
+    const g = gastos.find(g=>g.id===editId);
+    if(g){ g.descricao=descricao; g.categoria=categoria; g.valor=valor; g.data=data; }
+  }else{
+    gastos.push({id:gerarId(), descricao, categoria, valor, data});
+  }
+  salvar('barbearia_gastos', gastos);
+  cancelarEdicaoGasto();
+  renderGastos();
+  renderRelatorio();
+  mostrarSucesso('sucessoGasto', editId ? 'Gasto atualizado!' : 'Gasto salvo com sucesso!');
+}
+
+function editarGasto(id){
+  const g = gastos.find(g=>g.id===id);
+  if(!g) return;
+  document.getElementById('gastoEditId').value = g.id;
+  document.getElementById('gastoDescricao').value = g.descricao;
+  document.getElementById('gastoCategoria').value = g.categoria;
+  document.getElementById('gastoValor').value = g.valor;
+  document.getElementById('gastoData').value = g.data;
+  document.getElementById('tituloFormGasto').textContent = 'Editar Gasto';
+  document.getElementById('btnCancelarEdicaoGasto').classList.remove('oculto');
+  mostrarAba('gastos');
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+function cancelarEdicaoGasto(){
+  document.getElementById('formGasto').reset();
+  document.getElementById('gastoEditId').value = '';
+  document.getElementById('gastoData').value = hojeISO();
+  document.getElementById('tituloFormGasto').textContent = 'Novo Gasto';
+  document.getElementById('btnCancelarEdicaoGasto').classList.add('oculto');
+  limparErros(['erroGastoDescricao','erroGastoValor','erroGastoData']);
+}
+
+function excluirGasto(id){
+  if(!confirm('Excluir este gasto?')) return;
+  gastos = gastos.filter(g=>g.id!==id);
+  salvar('barbearia_gastos', gastos);
+  renderGastos();
+  renderRelatorio();
+}
+
+/* ===================== RELATÓRIOS ===================== */
+function renderRelatorio(){
+  const mes = document.getElementById('relatorioMes').value;
+  if(!mes) return;
+
+  const atendimentosDoMes = agendamentos.filter(a=>a.status==='concluido' && a.data && a.data.slice(0,7)===mes);
+  const faturamento = atendimentosDoMes.reduce((s,a)=>s+Number(a.valorTotal||0),0);
+  const gastosDoMes = gastos.filter(g=>g.data && g.data.slice(0,7)===mes);
+  const totalGastos = gastosDoMes.reduce((s,g)=>s+Number(g.valor||0),0);
+  const lucro = faturamento - totalGastos;
+
+  document.getElementById('relFaturamento').textContent = formatarMoeda(faturamento);
+  document.getElementById('relGastos').textContent = formatarMoeda(totalGastos);
+  document.getElementById('relLucro').textContent = formatarMoeda(lucro);
+  const lucroCard = document.getElementById('relLucro').closest('.resumo-card');
+  lucroCard.classList.toggle('resumo-erro', lucro<0);
+  lucroCard.classList.toggle('resumo-primario', lucro>=0);
+
+  const formas = ['dinheiro','cartao','pix'];
+  const nomesFormas = {dinheiro:'💵 Dinheiro', cartao:'💳 Cartão', pix:'📱 Pix'};
+  const totalPorForma = {};
+  formas.forEach(f=> totalPorForma[f] = atendimentosDoMes.filter(a=>a.formaPagamento===f).reduce((s,a)=>s+Number(a.valorTotal||0),0));
+
+  document.getElementById('relFormasPagamento').innerHTML = formas.map(f=>{
+    const valor = totalPorForma[f];
+    const pct = faturamento>0 ? Math.round((valor/faturamento)*100) : 0;
+    return `
+      <div class="linha-pagamento">
+        <span>${nomesFormas[f]}</span>
+        <div class="barra-fundo"><div class="barra-preenchida" style="width:${pct}%"></div></div>
+        <span>${formatarMoeda(valor)} (${pct}%)</span>
+      </div>
+    `;
+  }).join('');
+
+  const numAtendimentos = atendimentosDoMes.length;
+  const ticketMedio = numAtendimentos>0 ? faturamento/numAtendimentos : 0;
+  document.getElementById('relExtras').textContent = `${numAtendimentos} atendimento(s) concluído(s) • Ticket médio: ${formatarMoeda(ticketMedio)}`;
+}
+
+function gerarPDFRelatorio(){
+  renderRelatorio();
+  const mes = document.getElementById('relatorioMes').value;
+  if(!mes){ alert('Escolha o mês do relatório.'); return; }
+  const [ano, mesNum] = mes.split('-');
+  const nomesMes = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+  const tituloMes = `${nomesMes[parseInt(mesNum,10)-1]} de ${ano}`;
+
+  document.getElementById('printArea').innerHTML = `
+    <div class="impresso">
+      <h1>✂️ Barbearia — Relatório Mensal</h1>
+      <p>Período: ${tituloMes}</p>
+      <table class="impresso-tabela">
+        <tbody>
+          <tr><td>Faturamento</td><td style="text-align:right">${document.getElementById('relFaturamento').textContent}</td></tr>
+          <tr><td>Gastos</td><td style="text-align:right">${document.getElementById('relGastos').textContent}</td></tr>
+          <tr><td><strong>Lucro</strong></td><td style="text-align:right"><strong>${document.getElementById('relLucro').textContent}</strong></td></tr>
+        </tbody>
+      </table>
+      <h3>Recebimentos por forma de pagamento</h3>
+      <p>${document.getElementById('relFormasPagamento').innerText.replace(/\n+/g,'  |  ')}</p>
+      <p>${document.getElementById('relExtras').textContent}</p>
+    </div>
+  `;
+  window.print();
+}
+</script>
+</body>
+</html>
