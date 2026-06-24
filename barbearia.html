@@ -152,15 +152,6 @@
   .barra-fundo{background:var(--card-alt);border-radius:6px;height:10px;overflow:hidden;}
   .barra-preenchida{background:var(--primary);height:100%;border-radius:6px;transition:.3s ease;}
 
-  /* ===== Login ===== */
-  .login-screen{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;}
-  .login-card{background:var(--card);border-radius:12px;box-shadow:0 1px 3px rgba(0,0,0,.4);padding:32px;max-width:380px;width:100%;text-align:center;}
-  .login-card .logo-badge{width:64px;height:64px;font-size:32px;margin:0 auto 16px;}
-  .login-title{font-size:24px;font-weight:800;}
-  .login-subtitle{color:var(--text-muted);font-size:14px;margin:4px 0 24px;}
-  .login-card form{text-align:left;}
-  .erro-login{color:var(--error-text);font-size:14px;margin-bottom:12px;min-height:0;}
-
   /* ===== Modal pagamento ===== */
   .modal-fundo{position:fixed;inset:0;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;padding:16px;z-index:50;}
   .modal-card{background:var(--card);border-radius:12px;padding:24px;max-width:340px;width:100%;text-align:center;}
@@ -192,31 +183,8 @@
 
 <div class="faixa-decorativa"></div>
 
-<!-- ===== TELA DE LOGIN ===== -->
-<div id="loginScreen" class="login-screen">
-  <div class="login-card">
-    <div class="logo-badge">✂️</div>
-    <h1 class="login-title">Barbearia</h1>
-    <p class="login-subtitle">Sistema de Gestão</p>
-    <form id="formLogin" onsubmit="fazerLogin(event)" novalidate>
-      <div class="campo">
-        <label for="loginUsuario">Usuário</label>
-        <input type="text" id="loginUsuario" autocomplete="username">
-        <span class="erro" id="erroUsuario"></span>
-      </div>
-      <div class="campo">
-        <label for="loginSenha">Senha</label>
-        <input type="password" id="loginSenha" autocomplete="current-password">
-        <span class="erro" id="erroSenha"></span>
-      </div>
-      <div class="erro-login" id="erroLogin"></div>
-      <button type="submit" class="btn btn-primary btn-full">Entrar</button>
-    </form>
-  </div>
-</div>
-
 <!-- ===== APP ===== -->
-<div id="app" class="app oculto">
+<div id="app" class="app">
   <header class="topo">
     <div class="topo-marca">
       <div class="logo-badge logo-badge-sm">✂️</div>
@@ -225,7 +193,6 @@
         <p class="topo-subtitulo">Sistema de Gestão</p>
       </div>
     </div>
-    <button class="btn btn-secundario" onclick="fazerLogout()">Sair</button>
   </header>
 
   <nav class="abas">
@@ -497,9 +464,6 @@ let agendamentos = [];
 let gastos = [];
 let pendingConcluirId = null;
 
-const LOGIN_USUARIO = 'teste01';
-const LOGIN_SENHA = '12345678';
-
 /* ===================== ARMAZENAMENTO ===================== */
 function carregar(chave, padrao){
   try{
@@ -553,32 +517,6 @@ function mostrarSucesso(id, msg){
   el.textContent = msg;
   el.classList.remove('oculto');
   setTimeout(()=>el.classList.add('oculto'), 3000);
-}
-
-/* ===================== LOGIN ===================== */
-function fazerLogin(e){
-  e.preventDefault();
-  limparErros(['erroUsuario','erroSenha']);
-  document.getElementById('erroLogin').textContent = '';
-  const usuario = document.getElementById('loginUsuario').value.trim();
-  const senha = document.getElementById('loginSenha').value;
-  let valido = true;
-  if(!usuario){ setErro('erroUsuario','Digite o usuário'); valido=false; }
-  if(!senha){ setErro('erroSenha','Digite a senha'); valido=false; }
-  if(!valido) return;
-
-  if(usuario===LOGIN_USUARIO && senha===LOGIN_SENHA){
-    document.getElementById('loginScreen').classList.add('oculto');
-    document.getElementById('app').classList.remove('oculto');
-    document.getElementById('formLogin').reset();
-    initApp();
-  }else{
-    document.getElementById('erroLogin').textContent = 'Usuário ou senha incorretos.';
-  }
-}
-function fazerLogout(){
-  document.getElementById('app').classList.add('oculto');
-  document.getElementById('loginScreen').classList.remove('oculto');
 }
 
 /* ===================== INICIALIZAÇÃO ===================== */
@@ -1070,6 +1008,8 @@ function renderRelatorio(){
   const ticketMedio = numAtendimentos>0 ? faturamento/numAtendimentos : 0;
   document.getElementById('relExtras').textContent = `${numAtendimentos} atendimento(s) concluído(s) • Ticket médio: ${formatarMoeda(ticketMedio)}`;
 }
+
+document.addEventListener('DOMContentLoaded', initApp);
 
 function gerarPDFRelatorio(){
   renderRelatorio();
